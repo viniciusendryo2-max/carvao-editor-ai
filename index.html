@@ -66,6 +66,11 @@
       background: #334155;
       color: #f8fafc;
     }
+    .message img {
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
     .input-container {
       padding: 12px;
       background: #1e293b;
@@ -90,16 +95,24 @@
     textarea:focus {
       border-color: #2563eb;
     }
+    .btn-group {
+      display: flex;
+      gap: 6px;
+    }
     button {
       background: #22c55e;
       color: white;
       border: none;
-      padding: 0 16px;
+      padding: 0 12px;
       height: 44px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
       flex-shrink: 0;
+      font-size: 14px;
+    }
+    .btn-img {
+      background: #8b5cf6;
     }
     button:active {
       opacity: 0.8;
@@ -109,18 +122,21 @@
 <body>
   <header>
     <div>🦫 <strong>Capivara IA</strong> <span class="status">● Online</span></div>
-    <button onclick="clearChat()" style="background:#334155; font-size:12px; padding:0 12px; height:32px;">Limpar</button>
+    <button onclick="clearChat()" style="background:#334155; font-size:12px; padding:0 10px; height:32px;">Limpar</button>
   </header>
 
   <div id="chat-container"></div>
 
   <div class="input-container">
-    <textarea id="user-input" placeholder="Digite sua mensagem..."></textarea>
-    <button onclick="sendMessage()">Enviar</button>
+    <textarea id="user-input" placeholder="Digite sua mensagem ou pedido de imagem..."></textarea>
+    <div class="btn-group">
+      <button onclick="sendMessage()" title="Enviar Texto">Enviar</button>
+      <button onclick="sendImagePrompt()" class="btn-img" title="Gerar Imagem">🖼️ Foto</button>
+    </div>
   </div>
 
   <script>
-    const GROQ_API_KEY = "Sua_Chave_Groq_Aqui";
+    const GROQ_API_KEY = "Gsk_joO6tOqM6cn7MxPYLm1IWGdyb3FYGzq4ZUCPMyhb2Yy6eYTnNTTT";
 
     async function sendMessage() {
       const input = document.getElementById('user-input');
@@ -153,14 +169,44 @@
       }
     }
 
+    async function sendImagePrompt() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage("🖼️ Gerar imagem: " + text, 'user');
+      input.value = '';
+
+      const botMsgDiv = addMessage('Gerando imagem...', 'bot');
+
+      try {
+        // Usando Pollinations.ai para gerar imagens fantásticas gratuitamente via URL direta
+        const encodedPrompt = encodeURIComponent(text);
+        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=512&height=512&nologo=true`;
+        
+        botMsgDiv.innerHTML = `Aqui está a sua imagem:<br><img src="${imageUrl}" alt="${text}" onload="scrollToBottom()">`;
+      } catch (err) {
+        botMsgDiv.textContent = 'Erro ao gerar a imagem.';
+      }
+    }
+
     function addMessage(text, sender) {
       const container = document.getElementById('chat-container');
       const div = document.createElement('div');
       div.className = `message ${sender}`;
-      div.textContent = text;
+      if(sender === 'user') {
+        div.textContent = text;
+      } else {
+        div.innerHTML = text;
+      }
       container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+      scrollToBottom();
       return div;
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('chat-container');
+      container.scrollTop = container.scrollHeight;
     }
 
     function clearChat() {

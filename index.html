@@ -130,7 +130,7 @@
   <div id="chat-container"></div>
 
   <div class="input-container">
-    <textarea id="user-input" placeholder="Digite uma pergunta, pedido de imagem ou tema de vídeo..."></textarea>
+    <textarea id="user-input" placeholder="Digite uma pergunta, pedido de imagem ou tema..."></textarea>
     <div class="btn-group">
       <button onclick="sendMessage()" title="Enviar Mensagem">💬 Chat</button>
       <button onclick="sendImagePrompt()" class="btn-img" title="Gerar Imagem">🖼️ Foto</button>
@@ -139,8 +139,7 @@
   </div>
 
   <script>
-    // Usando a tua chave da Groq integrada e otimizada
-    const API_KEY = "Gsk_ocsEeQaARfLqD7Uqr4eeWGdyb3FY6BnAbewQtSgiDGSMWe7nFyJ8";
+    const API_KEY = "Gsk_UlBwZUoMsAI1PutmE1STWGdyb3FYpdz0qs2woTFy0e033quY59ok";
 
     async function sendMessage(customPrompt = null) {
       const input = document.getElementById('user-input');

@@ -49,11 +49,11 @@
       -webkit-overflow-scrolling: touch;
     }
     .message {
-      max-width: 85%;
-      padding: 10px 14px;
+      max-width: 88%;
+      padding: 12px 14px;
       border-radius: 12px;
       font-size: 15px;
-      line-height: 1.4;
+      line-height: 1.5;
       word-break: break-word;
     }
     .user {
@@ -76,19 +76,19 @@
       background: #1e293b;
       border-top: 1px solid #334155;
       display: flex;
+      flex-direction: column;
       gap: 8px;
       flex-shrink: 0;
-      align-items: center;
     }
     textarea {
-      flex: 1;
+      width: 100%;
       background: #0f172a;
       border: 1px solid #334155;
       color: white;
       padding: 10px;
       border-radius: 8px;
       resize: none;
-      height: 44px;
+      height: 48px;
       font-size: 15px;
       outline: none;
     }
@@ -100,19 +100,21 @@
       gap: 6px;
     }
     button {
+      flex: 1;
       background: #22c55e;
       color: white;
       border: none;
-      padding: 0 12px;
-      height: 44px;
+      height: 40px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      flex-shrink: 0;
-      font-size: 14px;
+      font-size: 13px;
     }
     .btn-img {
       background: #8b5cf6;
+    }
+    .btn-video {
+      background: #e11d48;
     }
     button:active {
       opacity: 0.8;
@@ -122,29 +124,33 @@
 <body>
   <header>
     <div>🦫 <strong>Capivara IA</strong> <span class="status">● Online</span></div>
-    <button onclick="clearChat()" style="background:#334155; font-size:12px; padding:0 10px; height:32px;">Limpar</button>
+    <button onclick="clearChat()" style="background:#334155; font-size:12px; padding:0 10px; height:32px; flex:none;">Limpar</button>
   </header>
 
   <div id="chat-container"></div>
 
   <div class="input-container">
-    <textarea id="user-input" placeholder="Digite sua mensagem ou pedido de imagem..."></textarea>
+    <textarea id="user-input" placeholder="Digite uma pergunta, pedido de imagem ou tema de vídeo..."></textarea>
     <div class="btn-group">
-      <button onclick="sendMessage()" title="Enviar Texto">Enviar</button>
+      <button onclick="sendMessage()" title="Enviar Mensagem">💬 Chat</button>
       <button onclick="sendImagePrompt()" class="btn-img" title="Gerar Imagem">🖼️ Foto</button>
+      <button onclick="sendVideoPrompt()" class="btn-video" title="Criar Roteiro de Vídeo">🎬 Vídeo</button>
     </div>
   </div>
 
   <script>
-    const GROQ_API_KEY = "Gsk_joO6tOqM6cn7MxPYLm1IWGdyb3FYGzq4ZUCPMyhb2Yy6eYTnNTTT";
+    // Usando a tua chave da Groq integrada e otimizada
+    const API_KEY = "Gsk_ocsEeQaARfLqD7Uqr4eeWGdyb3FY6BnAbewQtSgiDGSMWe7nFyJ8";
 
-    async function sendMessage() {
+    async function sendMessage(customPrompt = null) {
       const input = document.getElementById('user-input');
-      const text = input.value.trim();
+      const text = customPrompt || input.value.trim();
       if (!text) return;
 
-      addMessage(text, 'user');
-      input.value = '';
+      if (!customPrompt) {
+        addMessage(text, 'user');
+        input.value = '';
+      }
 
       const botMsgDiv = addMessage('Pensando...', 'bot');
 
@@ -153,7 +159,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`
+            'Authorization': `Bearer ${API_KEY}`
           },
           body: JSON.stringify({
             model: 'llama-3.3-70b-versatile',
@@ -177,17 +183,35 @@
       addMessage("🖼️ Gerar imagem: " + text, 'user');
       input.value = '';
 
-      const botMsgDiv = addMessage('Gerando imagem...', 'bot');
+      const botMsgDiv = addMessage('Gerando foto...', 'bot');
 
       try {
-        // Usando Pollinations.ai para gerar imagens fantásticas gratuitamente via URL direta
         const encodedPrompt = encodeURIComponent(text);
-        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=512&height=512&nologo=true`;
+        const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=768&height=768&nologo=true`;
         
         botMsgDiv.innerHTML = `Aqui está a sua imagem:<br><img src="${imageUrl}" alt="${text}" onload="scrollToBottom()">`;
       } catch (err) {
         botMsgDiv.textContent = 'Erro ao gerar a imagem.';
       }
+    }
+
+    function sendVideoPrompt() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage("🎬 Criar roteiro de vídeo: " + text, 'user');
+      input.value = '';
+
+      const videoPrompt = `Atue como um especialista em produção e roteiros de vídeos virais para YouTube/TikTok/Reels. Crie um roteiro completo, detalhado e altamente atraente sobre o seguinte tema: "${text}".
+      
+      Estruture a resposta em:
+      1. 🎯 **Gancho Inicial (0 a 5 segundos)**
+      2. 📜 **Roteiro Completo (Narração + Visual para cada cena)**
+      3. 💡 **Prompts de Imagens/IA sugeridos para cada cena**
+      4. 🏷️ **Títulos Virais e Tags recomendadas**`;
+
+      sendMessage(videoPrompt);
     }
 
     function addMessage(text, sender) {

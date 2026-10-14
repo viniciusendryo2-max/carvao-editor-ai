@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Capivara IA</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      background: #0f172a; 
+      color: #f8fafc; 
+      margin: 0; 
+      padding: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh; 
+      overflow: hidden;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 12px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    @keyframes pularCapivara {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .capivara-pulando {
+      animation: pularCapivara 0.35s ease infinite;
+    }
+
+    .header-avatar {
+      font-size: 1.4rem;
+      display: inline-block;
+    }
+    
+    header h2 { font-size: 1.1rem; margin: 0; color: #38bdf8; font-weight: 600; }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      background: #1e293b;
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .btn-limpar {
+      background: #334155;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-limpar:active { background: #475569; }
+
+    #chat { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 8px 4px; 
+      border-radius: 12px; 
+      background: #1e293b; 
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .msg-bloco { 
+      width: 100%;
+      line-height: 1.6; 
+      font-size: 0.98rem;
+      word-break: break-word;
+      padding: 0 8px;
+    }
+    
+    .user-text { 
+      color: #93c5fd; 
+      font-weight: 600;
+      border-left: 3px solid #2563eb;
+      padding-left: 10px;
+    }
+    
+    .bot-text { 
+      color: #f1f5f9; 
+    }
+
+    .bot-text p { margin: 0 0 10px 0; }
+    .bot-text p:last-child { margin-bottom: 0; }
+    .bot-text ul, .bot-text ol { margin: 6px 0; padding-left: 20px; }
+    .bot-text code { background: #0f172a; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+    
+    .chat-img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid #334155;
+      display: block;
+    }
+
+    #input-container { 
+      display: flex; 
+      gap: 8px; 
+      margin-top: 12px; 
+      background: #1e293b;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+    }
+
+    input { 
+      flex: 1; 
+      padding: 10px; 
+      border-radius: 8px; 
+      border: none; 
+      outline: none; 
+      background: #0f172a;
+      color: #f8fafc;
+      font-size: 0.95rem;
+    }
+    
+    input::placeholder { color: #64748b; }
+
+    button.btn-enviar { 
+      padding: 10px 18px; 
+      background: #10b981; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer;
+    }
+    button.btn-enviar:active { background: #059669; }
+
+    .typing span {
+      animation: blink 1.4s infinite both;
+      height: 6px;
+      width: 6px;
+      background: #94a3b8;
+      display: inline-block;
+      border-radius: 50%;
+      margin: 0 2px;
+    }
+    .typing span:nth-child(2) { animation-delay: .2s; }
+    .typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <span id="capivara-icone" class="header-avatar">🦫</span>
+      <h2>Capivara IA</h2>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span id="status-texto">Online</span>
+      </div>
+    </div>
+    <button class="btn-limpar" onclick="limparConversa()">🗑️ Limpar</button>
+  </header>
+
+  <div id="chat">
+    <!-- Vazio de propósito para abrir completamente limpo -->
+  </div>
+
+  <div id="input-container">
+    <input type="text" id="mensagemInput" placeholder="Digite sua mensagem ou pedido..." autocomplete="off" onkeypress="handleKeyPress(event)">
+    <button class="btn-enviar" onclick="enviarMensagem()">Enviar</button>
+  </div>
+
+  <script>
+    let historicoMensagens = [
+      { 
+        role: "system", 
+        content: "Tu és a Capivara IA, um assistente inteligente e prestativo desenvolvido por um programador brasileiro usando a tecnologia da Groq. Responde sempre em português de forma direta e natural." 
+      }
+    ];
+
+    const iconeCapivara = document.getElementById("capivara-icone");
+    const statusTexto = document.getElementById("status-texto");
+
+    function rolarParaBaixo() {
+      const chat = document.getElementById("chat");
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function limparConversa() {
+      historicoMensagens = [historicoMensagens[0]]; 
+      document.getElementById("chat").innerHTML = '';
+    }
+
+    async function chamarCapivaraIA(mensagem) {
+      const chaveAPI = "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";
+      const url = "https://api.groq.com/openai/v1/chat/completions";
+      const modelo = "openai/gpt-oss-20b";
+
+      historicoMensagens.push({ role: "user", content: mensagem });
+
+      if (historicoMensagens.length > 20) {
+        const systemPrompt = historicoMensagens[0];
+        const ultimasMensagens = historicoMensagens.slice(-19);
+        historicoMensagens = [systemPrompt, ...ultimasMensagens];
+      }
+
+      try {
+        const resposta = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${chaveAPI}`
+          },
+          body: JSON.stringify({
+            model: modelo,
+            messages: historicoMensagens,
+            max_tokens: 2048
+          })
+        });
+
+        const dados = await resposta.json();
+        
+        if (dados.choices && dados.choices.length > 0) {
+          const respostaBot = dados.choices[0].message.content;
+          historicoMensagens.push({ role: "assistant", content: respostaBot });
+          return respostaBot;
+        } else if (dados.error) {
+          return "Opa, ocorreu um erro na API.";
+        }
+      } catch (erro) {
+        return "Tive um problema de conexão com os servidores.";
+      }
+
+      return "Não foi possível obter resposta.";
+    }
+
+    async function enviarMensagem() {
+      const input = document.getElementById("mensagemInput");
+      const chat = document.getElementById("chat");
+      const texto = input.value.trim();
+
+      if (!texto) return;
+
+      chat.innerHTML += `<div class="msg-bloco user-text">${escapeHtml(texto)}</div>`;
+      input.value = "";
+      rolarParaBaixo();
+
+      iconeCapivara.classList.add("capivara-pulando");
+      statusTexto.textContent = "Processando...";
+
+      const botMsgDiv = document.createElement("div");
+      botMsgDiv.className = "msg-bloco bot-text typing";
+      botMsgDiv.innerHTML = '<span></span><span></span><span></span>';
+      chat.appendChild(botMsgDiv);
+      rolarParaBaixo();
+
+      const textoMinusculo = texto.toLowerCase();
+      const palavrasChave = ["gera", "gerar", "crie", "criar", "desenhe", "foto", "imagem", "mostre"];
+      const ehPedidoImagem = palavrasChave.some(palavra => textoMinusculo.includes(palavra));
+
+      if (ehPedidoImagem) {
+        let promptImg = texto
+          .replace(/gera uma imagem de|gerar imagem de|crie uma imagem de|criar imagem de|desenhe|uma imagem de|imagem de|foto de|gera uma foto de|gerar foto de|crie uma foto de|criar foto de|gera|gerar|crie|criar|desenhe|foto|imagem|mostre/gi, "")
+          .trim();
+        
+        if (!promptImg) promptImg = texto;
+
+        const promptRealista = `${promptImg}, realistic photograph, highly detailed 8k, raw photo, natural lighting, ultra realistic`;
+        const urlImagem = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptRealista)}?width=768&height=768&model=flux&enhance=true&nologo=true`;
+
+        iconeCapivara.classList.remove("capivara-pulando");
+        statusTexto.textContent = "Online";
+
+        botMsgDiv.className = "msg-bloco bot-text";
+        botMsgDiv.innerHTML = `<img src="${urlImagem}" class="chat-img" alt="Foto Gerada">`;
+        rolarParaBaixo();
+        return;
+      }
+
+      const respostaIA = await chamarCapivaraIA(texto);
+      
+      iconeCapivara.classList.remove("capivara-pulando");
+      statusTexto.textContent = "Online";
+
+      botMsgDiv.className = "msg-bloco bot-text";
+      botMsgDiv.innerHTML = marked.parse(respostaIA);
+      rolarParaBaixo();
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        enviarMensagem();
+      }
+    }
+  </script>
+</body>
+</html>
